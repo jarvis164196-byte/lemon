@@ -9,7 +9,23 @@ from .imaging import pixels
 
 def validate_step(step: dict) -> dict:
     tool, args = step.get("tool"), step.get("arguments", {})
-    if tool == "curves":
+    if tool == "retouch":
+        if set(args) != {"kind", "region", "amount"} or args["kind"] not in {"skin", "wrinkles", "reshape"}:
+            raise ValueError("Invalid retouch tool.")
+        region = args["region"]
+        if (
+            not isinstance(region, list)
+            or len(region) != 4
+            or any(type(v) not in (int, float) or not math.isfinite(v) for v in region)
+        ):
+            raise ValueError("Select a valid retouch area.")
+        x, y, w, h = region
+        if x < 0 or y < 0 or w < 0.01 or h < 0.01 or x + w > 1.000001 or y + h > 1.000001:
+            raise ValueError("Retouch area must stay within the photo.")
+        amount = args["amount"]
+        if type(amount) not in (int, float) or not math.isfinite(amount) or not 0.05 <= amount <= 0.8:
+            raise ValueError("Retouch amount must be between 0.05 and 0.8.")
+    elif tool == "curves":
         if set(args) != {"channel", "values"} or args["channel"] != "VALUE":
             raise ValueError("Only a value curve is supported.")
         values = args["values"]

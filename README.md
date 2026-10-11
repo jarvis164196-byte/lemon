@@ -104,3 +104,11 @@ Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Licensed unde
 The bundled `rawpy` dependency wraps LibRaw; no separate darktable installation is required. File selection accepts CR2, CR3, CRW, NEF/NRW, ARW/SRF/SR2, RAF, DNG, ORF, RW2, PEF, SRW, and additional RAW extensions. Actual camera and compression support depends on [LibRaw](https://www.libraw.org/supported-cameras), not just the extension. Unsupported or damaged files produce an import error. Only Canon CR2 has been exercised with a real user-provided file so far; other families are decoder-backed, not individually verified.
 
 RAW import uses the decoded sensor image (which can include more edge pixels than the camera JPEG), rather than an embedded JPEG preview. The conversion is a starting rendition, not a promise to match the camera JPEG. The current grading workflow is 8-bit sRGB; it is not a high-bit-depth RAW editor. RAW previews appear after import. Existing sidecars and user editor presets are not read.
+
+## Export and cosmetic retouching
+
+**Export selected** offers JPEG quality (1–100), PNG lossless compression (0–9), and original/preset/custom long-edge sizes. Aspect ratio is preserved, without upscaling. JPEG flattens transparency onto white. Native GIMP exports the selected checkpoint; saved versions and original files are unchanged. Export provenance records the actual size, format and settings.
+
+**Retouch selected area** opens a before/preview dialog. Drag an oval, choose a tool and strength, then generate a local GIMP preview. Save version commits only that reviewed preview; Cancel leaves the working version unchanged. Retouching a historical selection creates a branch on acceptance. Changing the working revision invalidates pending previews.
+
+Tools: edge-preserving skin smoothing, gentle blur for wrinkle softening, and experimental local pinch for reshaping. Pinch is not automatic leg detection or anatomically constrained slimming; it can alter nearby clothing/background. Wrinkle softening reduces detail rather than healing/reconstructing deep folds. Select small areas, compare results, and preserve natural texture. All tools use feathered elliptical selections. No photos are sent to a provider.

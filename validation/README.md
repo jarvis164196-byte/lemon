@@ -46,3 +46,9 @@ All eight EXIF transforms passed native GIMP 3.2.4 checks using asymmetric synth
 On October 11, 2026, an authorized Canon CR2 completed multipart upload through the authenticated running API, LibRaw development, GIMP root save/reopen, three committed edits, and a 3670×5496 PNG export. The original RAW hash remained unchanged and matched the preserved RAW in export provenance. The larger dimensions than the camera JPEG reflect decoded sensor-edge pixels. Decoder: rawpy 0.27.1 / LibRaw 0.22.1. No other RAW family has been exercised with a real fixture. Private originals and outputs remain outside this repository.
 
 38 automated tests pass. New coverage includes source/reference RAW routing and preserved provenance (mocked conversion), rejection of a malformed RAW by the real decoder, no published project on conversion failure, preserved RAW tamper detection, and timeout process-group termination/reaping.
+
+## Export and retouch verification
+
+GIMP 3.2.4 native tests on synthetic textures passed: all three retouch tools changed pixels inside an off-center selected region while preserving a distant outside region exactly; previews left the working pointer and history unchanged, and explicit acceptance committed a version. JPEG qualities 35/95 at 400×300 produced 21,047/92,853 bytes. PNG compression 0/9 produced 361,375/211,690 bytes with identical decoded pixels. Reproduce using `python scripts/check_features.py --workspace work/features`. Installed schemas are in `gimp-feature-schema.json`.
+
+44 automated tests pass, including aspect-ratio/no-upscale checks, option bounds, correct JPEG download headers, explicit preview approval, idempotent acceptance, stale/tampered preview rejection, and failed-preview isolation. Browser export of the real RAW-based version at JPEG quality 80 and 1080-pixel long edge completed at 721×1080. Browser selected-area smoothing preview is checked separately from human aesthetic evaluation.

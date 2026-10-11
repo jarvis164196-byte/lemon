@@ -37,6 +37,25 @@ class RunBody(StrictBody):
     request_id: str
 
 
+class RetouchBody(StrictBody):
+    node_id: str
+    kind: str
+    region: list[float] = Field(min_length=4, max_length=4)
+    amount: float = Field(ge=0.05, le=0.8, allow_inf_nan=False)
+
+
+class AcceptRetouchBody(StrictBody):
+    candidate_id: str
+
+
+class ExportBody(StrictBody):
+    node_id: str
+    format: str = "png"
+    long_edge: int | None = Field(default=None, ge=64, le=20000)
+    quality: int = Field(default=90, ge=1, le=100)
+    compression: int = Field(default=6, ge=0, le=9)
+
+
 class VersionBody(StrictBody):
     node_id: str
 
@@ -166,14 +185,22 @@ def create_app(data_dir, token=None, port=8765, adapter=None):
     def restore(project_id: str, body: VersionBody):
         return controller.restore(project_id, body.node_id)
 
+    @app.post("/api/projects/{project_id}/retouches")
+    def retouch(project_id: str, body: RetouchBody):
+        return controller.retouch_preview(project_id, **body.model_dump())
+
+    @app.post("/api/projects/{project_id}/retouches/accept")
+    def accept_retouch(project_id: str, body: AcceptRetouchBody):
+        return controller.accept_retouch(project_id, body.candidate_id)
+
     @app.post("/api/projects/{project_id}/exports")
-    def export(project_id: str, body: VersionBody):
-        return controller.export(project_id, body.node_id)
+    def export(project_id: str, body: ExportBody):
+        return controller.export(project_id, **body.model_dump())
 
     @app.get("/api/projects/{project_id}/assets/{role}")
     def asset(project_id: str, role: str, asset_id: str | None = None):
         path = controller.asset(project_id, role, asset_id)
-        return FileResponse(path, filename="lemon.png" if role == "export" else None)
+        return FileResponse(path, filename=("lemon" + path.suffix) if role == "export" else None)
 
     static = Path(__file__).parent / "static"
 

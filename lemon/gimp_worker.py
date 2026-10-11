@@ -8,13 +8,15 @@ from pathlib import Path
 import gi
 
 gi.require_version("Gimp", "3.0")
-from gi.repository import Gimp, Gio  # noqa: E402
+gi.require_version("Gegl", "0.4")
+from gi.repository import Gegl, Gimp, Gio  # noqa: E402
 
 
 def discover():
     names = [
         "gimp-xcf-save",
         "file-png-export",
+        "file-jpeg-export",
         "gimp-drawable-curves-explicit",
         "gimp-drawable-color-balance",
         "gimp-drawable-hue-saturation",
@@ -58,8 +60,11 @@ def save(image, path):
         raise RuntimeError("GIMP could not save the image.")
 
 
-def export_png(image, path):
-    proc = Gimp.get_pdb().lookup_procedure("file-png-export")
+def export_png(image, path, options=None):
+    options = options or {"format": "png", "compression": 6}
+    proc = Gimp.get_pdb().lookup_procedure(
+        "file-jpeg-export" if options["format"] == "jpeg" else "file-png-export"
+    )
     config = proc.create_config()
     for key, value in {
         "run-mode": Gimp.RunMode.NONINTERACTIVE,
@@ -73,9 +78,13 @@ def export_png(image, path):
         "include-color-profile": True,
     }.items():
         config.set_property(key, value)
+    if options["format"] == "jpeg":
+        config.set_property("quality", options["quality"] / 100)
+    else:
+        config.set_property("compression", options["compression"])
     result = proc.run(config)
     if result.index(0) != Gimp.PDBStatusType.SUCCESS:
-        raise RuntimeError("GIMP PNG export failed.")
+        raise RuntimeError("GIMP image export failed.")
 
 
 def identity(image, token):
@@ -127,7 +136,32 @@ def run(job):
     if job["action"] == "edit":
         step = job["step"]
         args = step["arguments"]
-        if step["tool"] == "curves":
+        if step["tool"] == "retouch":
+            x, y, w, h = args["region"]
+            x, w = x * size[0], w * size[0]
+            y, h = y * size[1], h * size[1]
+            image.select_ellipse(Gimp.ChannelOps.REPLACE, x, y, w, h)
+            Gimp.Selection.feather(image, max(1, min(w, h) * 0.12))
+            amount = args["amount"]
+            if args["kind"] == "skin":
+                op, params = (
+                    "gegl:bilateral-filter",
+                    {"blur-radius": 2 + 12 * amount, "edge-preservation": 8.0},
+                )
+            elif args["kind"] == "wrinkles":
+                op, params = "gegl:gaussian-blur", {"std-dev-x": 2 + 8 * amount, "std-dev-y": 2 + 8 * amount}
+            else:
+                op, params = "gegl:whirl-pinch", {"whirl": 0.0, "pinch": amount * 0.4, "radius": 1.0}
+            effect = Gimp.DrawableFilter.new(layer, op, step["label"])
+            config = effect.get_config()
+            for key, value in params.items():
+                config.set_property(key, value)
+            effect.set_opacity(1.0 if args["kind"] == "reshape" else amount)
+            effect.update()
+            layer.merge_filter(effect)
+            Gimp.Selection.none(image)
+            ok = True
+        elif step["tool"] == "curves":
             ok = layer.curves_explicit(Gimp.HistogramChannel.VALUE, args["values"])
         elif step["tool"] == "color_balance":
             ok = layer.color_balance(
@@ -155,7 +189,13 @@ def run(job):
         export_png(preview, job["preview"])
         preview.delete()
     elif job["action"] == "export":
-        export_png(image, job["output"])
+        options = job.get("export", {"format": "png", "size": size, "compression": 6})
+        if options["size"] != size:
+            image.scale(*options["size"])
+        if options["format"] == "jpeg":
+            Gimp.context_set_background(Gegl.Color.new("white"))
+            image.flatten()
+        export_png(image, job["output"], options)
     elif job["action"] != "verify":
         raise RuntimeError("Unknown worker action.")
     image.delete()

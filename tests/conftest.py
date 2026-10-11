@@ -27,7 +27,9 @@ class FakeAdapter:
             Path(job["checkpoint"]).write_text(json.dumps(job))
             Image.new("RGB", tuple(job["size"]), (90, 120, 140)).save(job["preview"])
         if job["action"] == "export":
-            Image.new("RGB", tuple(job["size"]), (90, 120, 140)).save(job["output"])
+            Image.new("RGB", tuple(job.get("export", {}).get("size", job["size"])), (90, 120, 140)).save(
+                job["output"]
+            )
         return {
             "reopened": True,
             "identity": job["identity"],

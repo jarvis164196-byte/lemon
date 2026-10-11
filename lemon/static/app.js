@@ -16,6 +16,7 @@ let project = null,
   mode = "reference",
   busy = false;
 const requests = new Map();
+let retouchCandidate = null, retouchRegion = null, retouchNode = null;
 function activity(message) {
   $("#activity").textContent = message;
   if (!$("#welcome").hidden) {
@@ -79,9 +80,10 @@ function lockControls() {
   $("#import-button").textContent = busy ? "Working…" : "Open in Lemon ↗";
   document
     .querySelectorAll(
-      "button:not([data-node]):not([data-view]), #import-form input, #strength, #planner, #instruction, #vision-consent",
+      "button:not([data-node]):not([data-view]), #import-form input, #strength, #planner, #instruction, #vision-consent, #retouch-dialog input, #retouch-dialog select",
     )
     .forEach((b) => (b.disabled = busy));
+  if (!busy) $("#retouch-save").disabled = !retouchCandidate;
   if (project && !busy) {
     $("#vision-consent").disabled = !visionAvailable;
     $("#propose").disabled = project.session_status !== "ready";
@@ -358,31 +360,86 @@ $("#pin").addEventListener("click", () => {
     `${nodeLabel(pinned)} pinned as Before. Select another version to compare.`,
   );
 });
+$("#export-format").addEventListener("change", () => {
+  const jpeg = $("#export-format").value === "jpeg";
+  $("#export-quality-label").hidden = !jpeg;
+  $("#export-compression-label").hidden = jpeg;
+});
+$("#export-size").addEventListener("change", () => {
+  $("#export-custom-label").hidden = $("#export-size").value !== "custom";
+});
 $("#export").addEventListener("click", async () => {
-  const nodeId = selected;
-  if (
-    !(await confirmAction(
-      `Export ${nodeLabel(nodeId)}?`,
-      "GIMP will export this saved version at full resolution as a PNG. The working version is unchanged.",
-      "Export PNG",
-    ))
-  )
-    return;
-  task(
-    `Exporting ${nodeLabel(nodeId)} from its saved GIMP checkpoint…`,
-    async () => {
-      const data = await api(`/projects/${project.id}/exports`, {
-        node_id: nodeId,
-      });
-      const a = document.createElement("a");
-      a.href = asset("export", data.export_id);
-      a.download = `lemon-${nodeLabel(nodeId)}.png`;
-      a.click();
-      activity(
-        `Exported ${nodeLabel(nodeId)} at full resolution. Provenance saved with the export.`,
-      );
-    },
-  );
+  const nodeId = selected, dialog = $("#export-dialog");
+  $("#export-title").textContent = `Export ${nodeLabel(nodeId)}`;
+  dialog.returnValue = "";
+  const approved = new Promise(resolve => dialog.addEventListener("close", () => resolve(dialog.returnValue === "approve"), {once:true}));
+  dialog.showModal();
+  if (!await approved) return;
+  const size = $("#export-size").value;
+  const options = {node_id:nodeId, format:$("#export-format").value,
+    long_edge: size === "custom" ? Number($("#export-custom").value) : size ? Number(size) : null,
+    quality:Number($("#export-quality").value), compression:Number($("#export-compression").value)};
+  task(`Exporting ${nodeLabel(nodeId)}…`, async () => {
+    const data = await api(`/projects/${project.id}/exports`, options);
+    const a = document.createElement("a"); a.href = asset("export", data.export_id);
+    a.download = `lemon-${nodeLabel(nodeId)}.${options.format === "jpeg" ? "jpg" : "png"}`; a.click();
+    activity(`Exported ${nodeLabel(nodeId)} at ${data.settings.size.join(" × ")} pixels. Saved versions are unchanged.`);
+  });
+});
+function invalidateRetouch() {
+  retouchCandidate = null; $("#retouch-save").disabled = true;
+  $("#retouch-after").hidden = true;
+  $("#retouch-status").textContent = "Area or settings changed. Generate a new preview.";
+}
+$("#retouch-open").addEventListener("click", () => {
+  retouchNode = selected; retouchRegion = null; invalidateRetouch();
+  $("#retouch-area").hidden = true;
+  $("#retouch-before").src = asset("preview", retouchNode);
+  $("#retouch-status").textContent = "Drag an oval around a small area to start.";
+  $("#retouch-dialog").showModal();
+});
+$("#retouch-close").addEventListener("click", () => $("#retouch-dialog").close());
+$("#retouch-dialog").addEventListener("cancel", e => { if (busy) e.preventDefault(); });
+for (const id of ["#retouch-kind", "#retouch-amount"]) $(id).addEventListener("input", invalidateRetouch);
+let retouchStart = null;
+function retouchPoint(e) {
+  const r = $("#retouch-surface").getBoundingClientRect();
+  return [Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)), Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))];
+}
+$("#retouch-surface").addEventListener("pointerdown", e => {
+  if (busy) return; e.preventDefault(); retouchStart = retouchPoint(e); e.currentTarget.setPointerCapture(e.pointerId); invalidateRetouch();
+});
+$("#retouch-surface").addEventListener("pointermove", e => {
+  if (!retouchStart || busy) return;
+  const p = retouchPoint(e), x = Math.min(p[0],retouchStart[0]), y = Math.min(p[1],retouchStart[1]);
+  const w = Math.abs(p[0]-retouchStart[0]), h = Math.abs(p[1]-retouchStart[1]); retouchRegion = [x,y,w,h];
+  const a = $("#retouch-area"); a.hidden = false;
+  Object.assign(a.style,{left:`${x*100}%`,top:`${y*100}%`,width:`${w*100}%`,height:`${h*100}%`});
+});
+$("#retouch-surface").addEventListener("pointerup", () => {retouchStart = null;});
+$("#retouch-preview").addEventListener("click", () => {
+  if (!retouchRegion || retouchRegion[2] < .01 || retouchRegion[3] < .01) {$("#retouch-status").textContent = "Drag a larger area on the photo first."; return;}
+  const settings = {node_id:retouchNode, kind:$("#retouch-kind").value, region:retouchRegion, amount:Number($("#retouch-amount").value)/100};
+  task("Rendering a local retouch preview in GIMP…", async () => {
+    invalidateRetouch(); $("#retouch-status").textContent = "Rendering preview in GIMP…";
+    try {
+      retouchCandidate = await api(`/projects/${project.id}/retouches`, settings);
+      $("#retouch-after").src = asset("retouch", retouchCandidate.id); $("#retouch-after").hidden = false;
+      $("#retouch-status").textContent = "Preview ready. Compare texture and background before saving. Your current version is unchanged.";
+      activity("Retouch preview ready. No saved version has changed.");
+    } catch (e) {$("#retouch-status").textContent = e.message; throw e;}
+  });
+});
+$("#retouch-save").addEventListener("click", () => {
+  if (!retouchCandidate) return;
+  const id = retouchCandidate.id;
+  task("Saving the approved retouch version…", async () => {
+    try {
+      project = await api(`/projects/${project.id}/retouches/accept`, {candidate_id:id});
+      selected = project.working_node_id; plan = null; retouchCandidate = null;
+      $("#retouch-dialog").close(); render(); activity("Retouch saved as a new version. Earlier versions are preserved.");
+    } catch(e) {$("#retouch-status").textContent = e.message; throw e;}
+  });
 });
 $("#new-project").addEventListener("click", () =>
   task("Ready for a new color study.", async () => {

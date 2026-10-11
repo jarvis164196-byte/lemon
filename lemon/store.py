@@ -14,6 +14,7 @@ import time
 import uuid
 from pathlib import Path
 
+from .exporting import export_settings
 from .imaging import validate_image
 from .planner import propose, validate_step
 from .raw import RAW_EXTENSIONS, develop
@@ -527,7 +528,103 @@ class Controller:
             self.write(path, state)
         return self.history(project_id)
 
-    def export(self, project_id, node_id):
+    def retouch_preview(self, project_id, node_id, kind, region, amount):
+        labels = {
+            "skin": "Smooth selected skin",
+            "wrinkles": "Soften selected wrinkles",
+            "reshape": "Reshape selected area",
+        }
+        step = validate_step(
+            {
+                "tool": "retouch",
+                "label": labels.get(kind, "Retouch"),
+                "arguments": {"kind": kind, "region": region, "amount": amount},
+            }
+        )
+        path = self.project(project_id)
+        with self.lock(path):
+            state = self.read(path)
+            if state["session_status"] != "ready" or node_id not in state["nodes"]:
+                raise ValueError("Restore a healthy version before retouching.")
+            self.verify_inputs(path, state)
+            checkpoint = self.verify_files(path, state["nodes"][node_id])
+            self.check_space(path, state["size"])
+            candidate_id = uid()
+            stage = path / "staging" / candidate_id
+            stage.mkdir()
+            candidate = {
+                "id": candidate_id,
+                "parent_id": node_id,
+                "revision": state["revision"],
+                "status": "prepared",
+                "step": step,
+            }
+            state.setdefault("retouches", {})[candidate_id] = candidate
+            self.write(path, state)
+            try:
+                evidence = self.adapter.call(
+                    self.job(
+                        state,
+                        "edit",
+                        checkpoint,
+                        step=step,
+                        checkpoint=stage / "checkpoint.xcf",
+                        preview=stage / "preview.png",
+                    )
+                )
+                if (
+                    not evidence.get("reopened")
+                    or evidence.get("identity") != state["identity"]
+                    or evidence.get("size") != state["size"]
+                ):
+                    raise ValueError("Retouch preview could not be verified.")
+                validate_image(stage / "preview.png")
+                self.verify_inputs(path, state)
+                candidate.update(
+                    status="preview",
+                    evidence=evidence,
+                    checkpoint_hash=digest(stage / "checkpoint.xcf"),
+                    preview_hash=digest(stage / "preview.png"),
+                )
+            except Exception:
+                candidate["status"] = "failed"
+                self.write(path, state)
+                raise
+            self.write(path, state)
+            return candidate
+
+    def accept_retouch(self, project_id, candidate_id):
+        path = self.project(project_id)
+        with self.lock(path):
+            state = self.read(path)
+            candidate = state.get("retouches", {}).get(identifier(candidate_id))
+            if not candidate:
+                raise ValueError("Retouch preview not found.")
+            if candidate["status"] == "committed":
+                return self.history(project_id)
+            if (
+                candidate["status"] != "preview"
+                or candidate["revision"] != state["revision"]
+                or state["session_status"] != "ready"
+            ):
+                raise ValueError("This preview is stale. Generate a new preview.")
+            self.verify_inputs(path, state)
+            self.verify_files(path, state["nodes"][candidate["parent_id"]])
+            stage = path / "staging" / candidate_id
+            for file, key in [("checkpoint.xcf", "checkpoint_hash"), ("preview.png", "preview_hash")]:
+                if digest(stage / file) != candidate[key]:
+                    raise ValueError("Retouch preview changed. Generate a new preview.")
+            state["operations"][candidate_id] = {"id": candidate_id, "kind": "retouch", "status": "prepared"}
+            self.write(path, state)
+            node = self.publish(
+                path, state, stage, uid(), candidate["parent_id"], candidate["step"], candidate["evidence"]
+            )
+            candidate.update(status="committed", node_id=node["id"])
+            state["operations"][candidate_id].update(status="committed", node_id=node["id"])
+            self.write(path, state)
+            return self.history(project_id)
+
+    def export(self, project_id, node_id, format="png", long_edge=None, quality=90, compression=6):
         path = self.project(project_id)
         with self.lock(path):
             state = self.read(path)
@@ -536,19 +633,25 @@ class Controller:
                 raise ValueError("Version not found.")
             checkpoint = self.verify_files(path, node)
             self.check_space(path, state["size"])
+            settings = export_settings(state["size"], format, long_edge, quality, compression)
             export_id = uid()
             folder = path / "exports" / export_id
             folder.mkdir()
-            self.adapter.call(self.job(state, "export", checkpoint, output=folder / "image.png"))
-            meta = validate_image(folder / "image.png", max_bytes=256 * 1024 * 1024)
-            if [meta["width"], meta["height"]] != state["size"]:
+            filename = "image.jpg" if format == "jpeg" else "image.png"
+            self.adapter.call(
+                self.job(state, "export", checkpoint, output=folder / filename, export=settings)
+            )
+            meta = validate_image(folder / filename, max_bytes=256 * 1024 * 1024)
+            if [meta["width"], meta["height"]] != settings["size"]:
                 raise ValueError("Export resolution does not match the saved version.")
             provenance = {
                 "export_id": export_id,
                 "node_id": node_id,
                 "checkpoint_hash": node["checkpoint_hash"],
                 "source_hash": state["inputs"]["source"]["sha256"],
-                "export_hash": digest(folder / "image.png"),
+                "export_hash": digest(folder / filename),
+                "filename": filename,
+                "settings": settings,
                 "inputs": state["inputs"],
                 "created": time.time(),
             }
@@ -562,11 +665,21 @@ class Controller:
             result = path / "inputs" / state["inputs"][role]["file"]
         elif role == "preview" and asset_id in state["nodes"]:
             result = path / "nodes" / identifier(asset_id) / "preview.png"
+        elif role == "retouch":
+            candidate = state.get("retouches", {}).get(identifier(asset_id))
+            if not candidate or candidate["status"] != "preview":
+                raise ValueError("Retouch preview not found.")
+            result = path / "staging" / asset_id / "preview.png"
+            if digest(result) != candidate["preview_hash"]:
+                raise ValueError("Retouch preview changed.")
         elif role in {"export", "provenance"}:
             folder = path / "exports" / identifier(asset_id)
             if not (folder / "provenance.json").is_file():
                 raise ValueError("Export not found.")
-            result = folder / ("image.png" if role == "export" else "provenance.json")
+            filename = json.loads((folder / "provenance.json").read_text()).get("filename", "image.png")
+            if filename not in {"image.png", "image.jpg"}:
+                raise ValueError("Invalid export filename.")
+            result = folder / (filename if role == "export" else "provenance.json")
         else:
             raise ValueError("Asset not found.")
         if result.is_symlink() or not result.resolve().is_relative_to(path) or not result.is_file():
