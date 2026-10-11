@@ -17,6 +17,8 @@ Unit tests cover failed save, interrupted prepared-operation recovery, corrupted
 
 `design-documentation-checks.json` is copied from the supplied design package. Its old hashes and checks describe that package, **not this implementation**. The imported documents remain historical specifications.
 
+The original native browser restore confirmation stalled the in-app test tab. It was replaced with an accessible in-page dialog. The new dialog passes static checks but its final browser interaction check remains pending until that old prompt is dismissed. Backend restoration and export passed the independent real-GIMP checks.
+
 ## Reproduce
 
 ```sh
