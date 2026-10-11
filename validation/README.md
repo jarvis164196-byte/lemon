@@ -40,3 +40,9 @@ Browser verification on October 11, 2026 confirmed that an unsupported grayscale
 On October 11, 2026, a user-authorized local photo pair completed upright import, three committed GIMP edits at 55% strength, and a 3648×5472 PNG export. Source and reference SHA-256 values were unchanged; the final preview differed from the original preview. Private photographs, hashes, filenames, and project records are excluded from this repository. This verifies mechanics on a real pair, not human acceptance of the aesthetic match.
 
 All eight EXIF transforms passed native GIMP 3.2.4 checks using asymmetric synthetic corner-color PNG fixtures compared against an in-memory orientation oracle. Reproduce with `python scripts/check_orientation.py --workspace work/orientation-test`. Unit tests now total 33 passing tests.
+
+## RAW import extension
+
+On October 11, 2026, an authorized Canon CR2 completed multipart upload through the authenticated running API, LibRaw development, GIMP root save/reopen, three committed edits, and a 3670×5496 PNG export. The original RAW hash remained unchanged and matched the preserved RAW in export provenance. The larger dimensions than the camera JPEG reflect decoded sensor-edge pixels. Decoder: rawpy 0.27.1 / LibRaw 0.22.1. No other RAW family has been exercised with a real fixture. Private originals and outputs remain outside this repository.
+
+38 automated tests pass. New coverage includes source/reference RAW routing and preserved provenance (mocked conversion), rejection of a malformed RAW by the real decoder, no published project on conversion failure, preserved RAW tamper detection, and timeout process-group termination/reaping.

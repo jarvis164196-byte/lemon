@@ -10,6 +10,7 @@ Write documentation, UI text, operation labels, and code comments in English. Us
 
 ## Editing and state
 
+- The user explicitly expanded scope to RAW import. LibRaw may develop RAW inputs into a documented 8-bit sRGB working copy; preserve the original RAW and conversion provenance. Pillow may encode that decoded array, without applying edits.
 - Real image edits, edited-state previews, and full-resolution exports must be produced by GIMP. Never silently substitute Pillow, OpenCV, generated images, or CSS filters. Auxiliary code may perform read-only analysis, validation, hashing, storage, and orchestration.
 - Only the controller may write the managed GIMP document. Do not expose a bypass MCP connection or arbitrary exec/eval capability to the agent.
 - Keep `selected_node_id`, `working_node_id`, branch tips, and editor session status separate. Clicking history is read-only.
@@ -37,4 +38,4 @@ Use loopback-only services, scoped resources, request authentication, exact Orig
 
 Maintain separate evidence for documentation checks, browser behavior, controller unit tests, real GIMP integration, and human photo evaluation. Implement the one-edit save/reopen/restore path first.
 
-Do not add cloud accounts, billing, automatic image-branch merging, a full painting UI, or a RAW/HDR pipeline to the MVP.
+Do not add cloud accounts, billing, automatic image-branch merging, a full painting UI, or an HDR editing pipeline to the MVP.

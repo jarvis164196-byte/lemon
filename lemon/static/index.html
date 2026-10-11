@@ -53,10 +53,10 @@
               type="file"
               id="source-file"
               name="source"
-              accept="image/jpeg,image/png"
+              accept="image/jpeg,image/png,.3fr,.arw,.cr2,.cr3,.crw,.dcr,.dng,.erf,.fff,.iiq,.kdc,.mef,.mos,.mrw,.nef,.nrw,.orf,.pef,.raf,.raw,.rw2,.sr2,.srf,.srw"
               required
             /><span class="upload-footer" id="source-filename"
-              >JPEG or PNG · sRGB · up to 40 MB</span
+              >JPEG / PNG / RAW · up to 128 MB RAW</span
             ></label
           ><label class="upload-card reference-card" id="reference-card"
             ><span class="upload-number">02 / YOUR INSPIRATION</span>
@@ -73,7 +73,7 @@
               type="file"
               id="reference-file"
               name="reference"
-              accept="image/jpeg,image/png"
+              accept="image/jpeg,image/png,.3fr,.arw,.cr2,.cr3,.crw,.dcr,.dng,.erf,.fff,.iiq,.kdc,.mef,.mos,.mrw,.nef,.nrw,.orf,.pef,.raf,.raw,.rw2,.sr2,.srf,.srw"
               required
             /><span class="upload-footer" id="reference-filename"
               >Color and light, without changing the scene</span
@@ -94,6 +94,7 @@
         </div>
         <p id="import-feedback" role="status" aria-live="polite" hidden></p>
       </form>
+      <p class="muted small">RAW files are developed locally into an 8-bit sRGB working copy. Originals are preserved. JPEG/PNG: 40 MB; RAW: 128 MB; up to 32 MP. Camera support varies.</p>
       <div class="welcome-foot">
         <span>Native GIMP editing</span><span>Recoverable versions</span
         ><span>No API key needed</span>

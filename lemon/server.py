@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from starlette.concurrency import run_in_threadpool
 
 from .gimp import EditorError, GimpAdapter
-from .imaging import MAX_BYTES
+from .raw import MAX_UPLOAD_BYTES, RAW_EXTENSIONS
 from .store import Controller
 from .vision import VisionPlanner
 
@@ -76,7 +76,7 @@ def create_app(data_dir, token=None, port=8765, adapter=None):
             content_length = int(request.headers.get("content-length", "0"))
         except ValueError:
             return JSONResponse({"detail": "Invalid content length."}, 400)
-        if content_length > 2 * MAX_BYTES + 1024 * 1024:
+        if content_length > 2 * MAX_UPLOAD_BYTES + 1024 * 1024:
             return JSONResponse({"detail": "Upload is too large."}, 413)
         response = await call_next(request)
         response.headers.update(
@@ -131,13 +131,14 @@ def create_app(data_dir, token=None, port=8765, adapter=None):
             paths = []
             try:
                 for index, upload in enumerate([source, reference]):
-                    path = Path(directory) / str(index)
+                    suffix = Path(upload.filename or "").suffix.lower()
+                    path = Path(directory) / (str(index) + (suffix if suffix in RAW_EXTENSIONS else ""))
                     count = 0
                     with path.open("wb") as output:
                         while chunk := await upload.read(1024 * 1024):
                             count += len(chunk)
-                            if count > MAX_BYTES:
-                                raise ValueError("Each photo must be smaller than 40 MB.")
+                            if count > MAX_UPLOAD_BYTES:
+                                raise ValueError("Each upload must be smaller than 128 MB.")
                             output.write(chunk)
                     paths.append(path)
                 return await run_in_threadpool(controller.create, name, *paths)

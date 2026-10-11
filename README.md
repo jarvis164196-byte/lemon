@@ -35,7 +35,7 @@ Projects default to `~/.local/share/lemon`. They contain private source/referenc
 
 ## Two photos → a new look
 
-1. Import your source and reference. Supported: single-image **8-bit sRGB RGB/RGBA PNG or RGB JPEG**, up to 40 MB and 32 MP each. Untagged files are treated as sRGB. Camera EXIF orientation is applied by GIMP to the managed copy; original files remain unchanged. Wide-gamut profiles, HDR, RAW, grayscale, and indexed inputs are rejected rather than silently converted.
+1. Import your source and reference. Supported: single-image **8-bit sRGB RGB/RGBA PNG or RGB JPEG**, up to 40 MB and 32 MP each. Untagged files are treated as sRGB. Camera EXIF orientation is applied by GIMP to the managed copy; original files remain unchanged. Wide-gamut JPEG/PNG profiles, HDR, grayscale, and indexed inputs are rejected. RAW source and reference files up to 128 MB are developed locally with LibRaw into an 8-bit sRGB working copy (camera white balance, automatic brightness, camera orientation). Original RAW bytes and conversion provenance are preserved. RAW sensor dimensions, including borders, must fit within 32 MP.
 2. GIMP creates and reopens the original XCF checkpoint. No editing starts without it.
 3. Choose a match strength and select **Analyze reference**. Local statistics propose three bounded adjustments: a monotonic brightness curve, midtone color balance, and saturation.
 4. Inspect exact parameters. Approve one step, or explicitly approve the remaining recipe. Each step saves and verifies its own version; any failure stops the group.
@@ -71,7 +71,7 @@ Browser → authenticated loopback API → controller → private GIMP batch pro
                                           └─ SQLite + XCF + native PNG previews
 ```
 
-Python/FastAPI serves a small dependency-free browser UI. Pillow and NumPy **only validate and read image statistics**; they never render edited output. The fixed worker in `lemon/gimp_worker.py` is the only production renderer. GIMP's existing batch interface avoids requiring a separate community MCP bridge.
+Python/FastAPI serves a small dependency-free browser UI. LibRaw/rawpy handles RAW development in a private subprocess with a timeout. Pillow encodes its RGB array as PNG and also validates/reads statistics; it never applies photo edits. The fixed worker in `lemon/gimp_worker.py` renders all subsequent edits, checkpoints, previews and exports. GIMP's existing batch interface avoids requiring a separate community MCP bridge.
 
 The original design package is preserved in [docs/design](docs/design/README.md). [Implementation decisions](docs/IMPLEMENTATION.md) explain the smaller alpha scope and differences from that proposal.
 
@@ -98,3 +98,9 @@ See [validation/README.md](validation/README.md) for the evidence boundary. Unit
 - Improve history layout for large trees and measure preview latency on large projects.
 
 Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Licensed under [MIT](LICENSE). GIMP is a separate dependency with its own license; it is not bundled in this repository.
+
+## RAW compatibility
+
+The bundled `rawpy` dependency wraps LibRaw; no separate darktable installation is required. File selection accepts CR2, CR3, CRW, NEF/NRW, ARW/SRF/SR2, RAF, DNG, ORF, RW2, PEF, SRW, and additional RAW extensions. Actual camera and compression support depends on [LibRaw](https://www.libraw.org/supported-cameras), not just the extension. Unsupported or damaged files produce an import error. Only Canon CR2 has been exercised with a real user-provided file so far; other families are decoder-backed, not individually verified.
+
+RAW import uses the decoded sensor image (which can include more edge pixels than the camera JPEG), rather than an embedded JPEG preview. The conversion is a starting rendition, not a promise to match the camera JPEG. The current grading workflow is 8-bit sRGB; it is not a high-bit-depth RAW editor. RAW previews appear after import. Existing sidecars and user editor presets are not read.

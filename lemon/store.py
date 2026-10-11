@@ -9,12 +9,14 @@ import os
 import re
 import shutil
 import sqlite3
+import tempfile
 import time
 import uuid
 from pathlib import Path
 
 from .imaging import validate_image
 from .planner import propose, validate_step
+from .raw import RAW_EXTENSIONS, develop
 
 
 def uid():
@@ -139,7 +141,9 @@ class Controller:
         return folder / "checkpoint.xcf"
 
     def verify_inputs(self, path, state):
-        for item in state["inputs"].values():
+        items = list(state["inputs"].values())
+        items += [item["raw_original"] for item in items if "raw_original" in item]
+        for item in items:
             if digest(path / "inputs" / item["file"]) != item["sha256"]:
                 raise ValueError("A preserved input has changed. Editing is blocked.")
 
@@ -205,9 +209,26 @@ class Controller:
         return node
 
     def create(self, name, source, reference):
+        source, reference = Path(source), Path(reference)
+        with tempfile.TemporaryDirectory(dir=self.root, prefix="raw-import-") as directory:
+            originals = {}
+            prepared = []
+            for role, original in [("source", source), ("reference", reference)]:
+                if original.suffix.lower() in RAW_EXTENSIONS:
+                    developed, evidence = develop(original, Path(directory) / role)
+                    originals[role] = (Path(directory) / role / ("input" + original.suffix.lower()), evidence)
+                    prepared.append(developed)
+                else:
+                    prepared.append(original)
+            return self._create(name, *prepared, raw_originals=originals)
+
+    def _create(self, name, source, reference, raw_originals):
         if not name.strip() or len(name) > 100:
             raise ValueError("Project names must contain 1–100 characters.")
-        source_meta, ref_meta = validate_image(source), validate_image(reference)
+        source_meta, ref_meta = [
+            validate_image(p, max_bytes=256 * 1024 * 1024) if role in raw_originals else validate_image(p)
+            for role, p in [("source", source), ("reference", reference)]
+        ]
         project_id = uid()
         path = self.root / project_id
         path.mkdir(mode=0o700)
@@ -236,6 +257,14 @@ class Controller:
             shutil.copyfile(original, target)
             target.chmod(0o400)
             state["inputs"][role] = {"file": filename, "sha256": digest(target), **meta}
+            if role in raw_originals:
+                raw_path, conversion = raw_originals[role]
+                raw_name = role + "-original" + raw_path.suffix.lower()
+                raw_copy = path / "inputs" / raw_name
+                shutil.copyfile(raw_path, raw_copy)
+                raw_copy.chmod(0o400)
+                state["inputs"][role]["raw_original"] = {"file": raw_name, "sha256": digest(raw_copy)}
+                state["inputs"][role]["conversion"] = conversion
         (path / "manifest.json").write_text(
             canonical({key: state[key] for key in ["schema", "id", "identity", "size", "inputs"]})
         )
@@ -520,6 +549,7 @@ class Controller:
                 "checkpoint_hash": node["checkpoint_hash"],
                 "source_hash": state["inputs"]["source"]["sha256"],
                 "export_hash": digest(folder / "image.png"),
+                "inputs": state["inputs"],
                 "created": time.time(),
             }
             (folder / "provenance.json").write_text(canonical(provenance))

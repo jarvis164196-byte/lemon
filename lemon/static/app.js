@@ -1,3 +1,4 @@
+const rawExtensions = new Set([".3fr", ".arw", ".cr2", ".cr3", ".crw", ".dcr", ".dng", ".erf", ".fff", ".iiq", ".kdc", ".mef", ".mos", ".mrw", ".nef", ".nrw", ".orf", ".pef", ".raf", ".raw", ".rw2", ".sr2", ".srf", ".srw"]);
 const $ = (s) => document.querySelector(s);
 const escape = (s) =>
   String(s ?? "").replace(
@@ -139,6 +140,8 @@ function render() {
       checkpoint_sha256: n.checkpoint_hash,
       gimp: n.evidence.environment?.version,
       verified: n.healthy,
+      source_conversion: project.inputs.source.conversion,
+      reference_conversion: project.inputs.reference.conversion,
     },
     null,
     2,
@@ -166,14 +169,14 @@ function renderPreview() {
   content += photo(
     asset("preview", selected),
     `${n.display_id} / ${mode === "compare" ? "After" : "Your photo"}`,
-    n.label,
+    !n.parent_id && project.inputs.source.conversion ? "RAW development · 8-bit sRGB" : n.label,
     `${n.display_id}: ${n.label}`,
   );
   if (mode === "reference")
     content += photo(
       asset("reference"),
       "Reference / Inspiration",
-      "Read-only original",
+      project.inputs.reference.conversion ? "Read-only RAW development · sRGB" : "Read-only original",
       "Reference photo",
     );
   $("#preview-grid").innerHTML = content;
@@ -249,6 +252,13 @@ for (const role of ["source", "reference"]) {
     const file = e.target.files[0];
     if (!file) return;
     if (oldURL) URL.revokeObjectURL(oldURL);
+    const extension = "." + file.name.split(".").pop().toLowerCase();
+    if (rawExtensions.has(extension)) {
+      $(`#${role}-upload-preview`).hidden = true;
+      $(`#${role}-upload-preview`).removeAttribute("src");
+      $(`#${role}-filename`).textContent = `${file.name} · RAW preview after import`;
+      return;
+    }
     oldURL = URL.createObjectURL(file);
     const img = $(`#${role}-upload-preview`);
     img.src = oldURL;
@@ -260,7 +270,7 @@ $("#import-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const data = new FormData(e.target);
   task(
-    "Creating your original checkpoint in GIMP. Saving and reopening for verification…",
+    "Importing photos (developing RAW locally when needed), then saving and verifying your original in GIMP…",
     async () => {
       project = await api("/projects", data);
       await openProject(project.id);
