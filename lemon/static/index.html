@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lemon — borrow the mood</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Lemon home"
+        ><span class="lemon-mark"></span>lemon<span class="alpha"
+          >LOCAL ALPHA</span
+        ></a
+      >
+      <div class="top-status">
+        <span id="editor-status">Checking editor…</span
+        ><span class="privacy">● Local by default</span>
+      </div>
+      <button id="new-project" class="quiet">＋ New project</button>
+    </header>
+    <div
+      id="notice"
+      class="notice"
+      role="status"
+      aria-live="polite"
+      hidden
+    ></div>
+    <main id="welcome">
+      <div class="intro">
+        <div class="eyebrow">A LITTLE INSPIRATION. STILL YOUR PHOTO.</div>
+        <h1>Borrow the mood.<br /><span>Keep the moment.</span></h1>
+        <p>
+          Give your photo the warmth, contrast, and color of a reference.<br />Every
+          adjustment is yours to review, compare, and revisit.
+        </p>
+      </div>
+      <form id="import-form">
+        <div class="upload-grid">
+          <label class="upload-card" id="source-card"
+            ><span class="upload-number">01 / YOUR PHOTO</span>
+            <div class="upload-placeholder">
+              <span class="upload-symbol">＋</span
+              ><strong>The moment to keep</strong
+              ><span>Choose your source photo</span>
+            </div>
+            <img
+              id="source-upload-preview"
+              alt="Your source photo"
+              hidden
+            /><input
+              type="file"
+              id="source-file"
+              name="source"
+              accept="image/jpeg,image/png"
+              required
+            /><span class="upload-footer" id="source-filename"
+              >JPEG or PNG · sRGB · up to 40 MB</span
+            ></label
+          ><label class="upload-card reference-card" id="reference-card"
+            ><span class="upload-number">02 / YOUR INSPIRATION</span>
+            <div class="upload-placeholder">
+              <span class="upload-symbol">✧</span
+              ><strong>The feeling to borrow</strong
+              ><span>Choose a reference photo</span>
+            </div>
+            <img
+              id="reference-upload-preview"
+              alt="Your reference photo"
+              hidden
+            /><input
+              type="file"
+              id="reference-file"
+              name="reference"
+              accept="image/jpeg,image/png"
+              required
+            /><span class="upload-footer" id="reference-filename"
+              >Color and light, without changing the scene</span
+            ></label
+          >
+        </div>
+        <div class="import-actions">
+          <label class="project-name"
+            >PROJECT NAME<input
+              id="project-name"
+              name="name"
+              maxlength="100"
+              value="My color study"
+              required /></label
+          ><button class="primary" type="submit">
+            Open in Lemon <span>↗</span>
+          </button>
+        </div>
+      </form>
+      <div class="welcome-foot">
+        <span>Native GIMP editing</span><span>Recoverable versions</span
+        ><span>No API key needed</span>
+      </div>
+      <section class="recent">
+        <h2>Pick up where you left off</h2>
+        <div id="recent-projects"></div>
+      </section>
+    </main>
+    <main id="workbench" hidden>
+      <aside class="history-panel">
+        <div class="panel-heading">
+          <span class="eyebrow">YOUR VERSIONS</span
+          ><span id="version-count"></span>
+        </div>
+        <h2 id="study-name"></h2>
+        <p class="muted small">Select to view. Restore to continue.</p>
+        <div id="history-list"></div>
+        <div class="storage" id="storage"></div>
+      </aside>
+      <section class="canvas-panel">
+        <div class="canvas-toolbar">
+          <div class="view-tabs" role="group" aria-label="Comparison view">
+            <button data-view="single">Photo</button
+            ><button data-view="reference" class="active">Reference</button
+            ><button data-view="compare">Before / after</button>
+          </div>
+          <button id="export" class="quiet">Export selected ↗</button>
+        </div>
+        <div id="preview-grid" class="preview-grid"></div>
+        <div class="canvas-caption">
+          <span id="viewing-label"></span><span id="working-label"></span>
+        </div>
+        <div class="canvas-bottom">
+          <span>GIMP renders every edit.</span
+          ><span>Full-resolution originals are preserved.</span>
+        </div>
+      </section>
+      <aside class="plan-panel">
+        <div class="eyebrow">THE REFERENCE RECIPE</div>
+        <h2>A feeling, <br />in three small steps.</h2>
+        <p class="muted">
+          Local analysis compares tone and color. You decide what feels right.
+        </p>
+        <label class="strength-label" for="strength"
+          >Match strength <output id="strength-value">55%</output></label
+        ><input type="range" id="strength" min="5" max="100" value="55" />
+        <div class="range-labels">
+          <span>Subtle</span><span>Expressive</span>
+        </div>
+        <details class="vision-settings">
+          <summary>Optional AI direction</summary>
+          <p id="vision-status" class="small muted">
+            Checking model configuration…
+          </p>
+          <label for="planner">Planner</label
+          ><select id="planner">
+            <option value="local">Local analysis · no upload</option></select
+          ><label for="instruction">What feeling are you after?</label
+          ><textarea
+            id="instruction"
+            maxlength="500"
+            placeholder="Warm evening light, softer contrast…"
+          ></textarea
+          ><label class="consent-label"
+            ><input type="checkbox" id="vision-consent" /> Allow OpenAI to
+            receive this project's working and reference previews for planning.
+            API charges may apply.</label
+          >
+          <p class="small muted">
+            Original files and metadata stay local. Revoke permission here at
+            any time. GIMP still performs every edit.
+          </p>
+        </details>
+        <button id="propose" class="primary full">
+          Analyze reference <span>✧</span>
+        </button>
+        <p id="plan-base" class="small muted"></p>
+        <div id="plan-steps"></div>
+        <div id="plan-actions"></div>
+        <div class="version-actions">
+          <button id="pin" class="quiet full">Pin selected as before</button
+          ><button id="restore" class="quiet full">Restore and continue</button>
+        </div>
+        <details class="technical">
+          <summary>Selected version details</summary>
+          <pre id="node-details"></pre>
+        </details>
+        <div class="limits">
+          <strong>Your scene stays yours.</strong>
+          <p>
+            This matches global tone and color. It does not move light sources,
+            reshape objects, or protect skin tones automatically.
+          </p>
+          <span id="cloud-state">Cloud AI: not connected</span>
+        </div>
+      </aside>
+    </main>
+    <dialog
+      id="confirm-dialog"
+      aria-labelledby="confirm-title"
+      aria-describedby="confirm-message"
+    >
+      <form method="dialog">
+        <h2 id="confirm-title"></h2>
+        <p id="confirm-message"></p>
+        <div class="dialog-actions">
+          <button value="cancel" autofocus>Cancel</button
+          ><button class="primary" id="confirm-action" value="approve">
+            Continue
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <footer id="activity-bar">
+      <span class="activity-dot"></span
+      ><span id="activity" aria-live="polite"
+        >Ready for a little inspiration.</span
+      ><span class="footer-version">LEMON / 0.1</span>
+    </footer>
+  </body>
+</html>

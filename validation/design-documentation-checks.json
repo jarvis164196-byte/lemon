@@ -1,0 +1,122 @@
+{
+  "scope": "English documentation and packaging only; no runtime, UI, GIMP, MCP, or AI tests were run.",
+  "date": "2026-10-10",
+  "checks": {
+    "expected_files_present": true,
+    "local_links_resolve": true,
+    "no_untranslated_cjk": true,
+    "balanced_code_fences": true,
+    "json_examples_parse": true
+  },
+  "local_links": [
+    {
+      "file": "README.md",
+      "target": "docs/NAMING.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "docs/PRD.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "docs/UI-SPEC.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "docs/ARCHITECTURE.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "docs/BACKLOG.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "docs/NAMING.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "docs/PROTOTYPE-STATUS.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "AGENTS.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "docs/PRD.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "target": "docs/ARCHITECTURE.md",
+      "exists": true
+    },
+    {
+      "file": "docs/PRD.md",
+      "target": "UI-SPEC.md",
+      "exists": true
+    }
+  ],
+  "json_examples": [
+    {
+      "file": "docs/ARCHITECTURE.md",
+      "example": 1,
+      "valid_json": true
+    }
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 5123,
+      "sha256": "d041fcbf4ef73acbef62632b40cef25662416cbfaadf3516a8b375b44edb50e1"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 3489,
+      "sha256": "247703113899291d2732fea6ece60965cb19ca21772411662baa1238899e02c2"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 367,
+      "sha256": "ba2e371f1af1f37ff6858034d0d193a2bff5492a0bbae8796a97ce0cad22f482"
+    },
+    {
+      "path": "docs/PRD.md",
+      "bytes": 18227,
+      "sha256": "684adbf7106ef8720d1eee61d538789f840c6cd4895c191ab4ef1e1e8e1bcddd"
+    },
+    {
+      "path": "docs/UI-SPEC.md",
+      "bytes": 12073,
+      "sha256": "3a148773f085ab97dcb842e0c450b6905eb7e29eea081e742817242542bac5db"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "bytes": 11475,
+      "sha256": "e9eb56177a59cb7b4a485cba43d27acf4f574f075b09523ec372f597dfddf3d4"
+    },
+    {
+      "path": "docs/BACKLOG.md",
+      "bytes": 6359,
+      "sha256": "009689d8e67102a2e86c2eb85e092626c5e0f98cd714be8e8023b7e63d9f918d"
+    },
+    {
+      "path": "docs/NAMING.md",
+      "bytes": 3397,
+      "sha256": "1919116eeb4d76ce21a982807eda99ab0430bb68fea94d00281636785be54042"
+    },
+    {
+      "path": "docs/PROTOTYPE-STATUS.md",
+      "bytes": 3279,
+      "sha256": "7fec33bc7e961f5058eb6e4c2c23c64a53941187e5e3a14dd592ca1ebf468858"
+    }
+  ]
+}

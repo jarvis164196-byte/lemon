@@ -1,0 +1,1038 @@
+{
+  "scope": "Real GIMP integration with synthetic fixtures; no human photo-quality claims",
+  "passed": true,
+  "checks": [
+    "root save/reopen",
+    "three native edits",
+    "distinct output pixels",
+    "application deduplication",
+    "controller and editor restart",
+    "restore S001",
+    "branch S004",
+    "restore S003",
+    "both branch tips preserved",
+    "explicit S000 full-resolution export",
+    "unchanged source and reference hashes"
+  ],
+  "inputs": {
+    "source.png": "81f82b25e5580fe0e871413f47fb70a69cf79753a81d7f4a205949cfa76fdb0a",
+    "reference.png": "df7f6d9d4f5ac394cc5d2367f4de01f2b3e19831e6ab73b3022731e1f1eacbac"
+  },
+  "nodes": [
+    {
+      "version": "S002",
+      "checkpoint_sha256": "5aacbea7fd64adec9a768df6becd2b679b6612d1a7a5609837629777dcdde120",
+      "preview_sha256": "9ae9eb0aa256390481e0a3d6377dccc7c7603659a6fd8aec9d01f0d2f6e9ccab",
+      "operation": "color_balance",
+      "verification": {
+        "environment": {
+          "procedures": {
+            "file-png-export": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "run-mode",
+                "type": "GimpRunMode"
+              },
+              {
+                "name": "image",
+                "type": "GimpImage"
+              },
+              {
+                "name": "file",
+                "type": "GFile"
+              },
+              {
+                "name": "options",
+                "type": "GimpExportOptions"
+              },
+              {
+                "name": "interlaced",
+                "type": "gboolean"
+              },
+              {
+                "name": "compression",
+                "type": "gint"
+              },
+              {
+                "name": "bkgd",
+                "type": "gboolean"
+              },
+              {
+                "name": "offs",
+                "type": "gboolean"
+              },
+              {
+                "name": "phys",
+                "type": "gboolean"
+              },
+              {
+                "name": "time",
+                "type": "gboolean"
+              },
+              {
+                "name": "save-transparent",
+                "type": "gboolean"
+              },
+              {
+                "name": "optimize-palette",
+                "type": "gboolean"
+              },
+              {
+                "name": "format",
+                "type": "gchararray"
+              },
+              {
+                "name": "include-exif",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-iptc",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-xmp",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-color-profile",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-thumbnail",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-comment",
+                "type": "gboolean"
+              }
+            ],
+            "gimp-drawable-color-balance": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "transfer-mode",
+                "type": "GimpTransferMode"
+              },
+              {
+                "name": "preserve-lum",
+                "type": "gboolean"
+              },
+              {
+                "name": "cyan-red",
+                "type": "gdouble"
+              },
+              {
+                "name": "magenta-green",
+                "type": "gdouble"
+              },
+              {
+                "name": "yellow-blue",
+                "type": "gdouble"
+              }
+            ],
+            "gimp-drawable-curves-explicit": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "channel",
+                "type": "GimpHistogramChannel"
+              },
+              {
+                "name": "values",
+                "type": "GimpDoubleArray"
+              }
+            ],
+            "gimp-drawable-hue-saturation": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "hue-range",
+                "type": "GimpHueRange"
+              },
+              {
+                "name": "hue-offset",
+                "type": "gdouble"
+              },
+              {
+                "name": "lightness",
+                "type": "gdouble"
+              },
+              {
+                "name": "saturation",
+                "type": "gdouble"
+              },
+              {
+                "name": "overlap",
+                "type": "gdouble"
+              }
+            ],
+            "gimp-xcf-save": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "run-mode",
+                "type": "GimpRunMode"
+              },
+              {
+                "name": "image",
+                "type": "GimpImage"
+              },
+              {
+                "name": "file",
+                "type": "GFile"
+              }
+            ]
+          },
+          "signatures": {
+            "color_balance": "color_balance(self, transfer_mode:Gimp.TransferMode, preserve_lum:bool, cyan_red:float, magenta_green:float, yellow_blue:float) -> bool",
+            "curves_explicit": "curves_explicit(self, channel:Gimp.HistogramChannel, values:list) -> bool",
+            "hue_saturation": "hue_saturation(self, hue_range:Gimp.HueRange, hue_offset:float, lightness:float, saturation:float, overlap:float) -> bool"
+          },
+          "version": "3.2.4"
+        },
+        "identity": "3ffb7a9373e34f708e3f560d60f93fe1",
+        "reopened": true,
+        "seconds": 9.773,
+        "size": [
+          1600,
+          1200
+        ]
+      }
+    },
+    {
+      "version": "S000",
+      "checkpoint_sha256": "f32df6ba7cbed041e67c38bd2df82aa235fb4624412b909b82da73dc0e5b15b4",
+      "preview_sha256": "7bfcff07fccd11e21be471b569f99dcb5ac97d691c659e67c6b18361dbb6981d",
+      "operation": "import",
+      "verification": {
+        "environment": {
+          "procedures": {
+            "file-png-export": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "run-mode",
+                "type": "GimpRunMode"
+              },
+              {
+                "name": "image",
+                "type": "GimpImage"
+              },
+              {
+                "name": "file",
+                "type": "GFile"
+              },
+              {
+                "name": "options",
+                "type": "GimpExportOptions"
+              },
+              {
+                "name": "interlaced",
+                "type": "gboolean"
+              },
+              {
+                "name": "compression",
+                "type": "gint"
+              },
+              {
+                "name": "bkgd",
+                "type": "gboolean"
+              },
+              {
+                "name": "offs",
+                "type": "gboolean"
+              },
+              {
+                "name": "phys",
+                "type": "gboolean"
+              },
+              {
+                "name": "time",
+                "type": "gboolean"
+              },
+              {
+                "name": "save-transparent",
+                "type": "gboolean"
+              },
+              {
+                "name": "optimize-palette",
+                "type": "gboolean"
+              },
+              {
+                "name": "format",
+                "type": "gchararray"
+              },
+              {
+                "name": "include-exif",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-iptc",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-xmp",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-color-profile",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-thumbnail",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-comment",
+                "type": "gboolean"
+              }
+            ],
+            "gimp-drawable-color-balance": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "transfer-mode",
+                "type": "GimpTransferMode"
+              },
+              {
+                "name": "preserve-lum",
+                "type": "gboolean"
+              },
+              {
+                "name": "cyan-red",
+                "type": "gdouble"
+              },
+              {
+                "name": "magenta-green",
+                "type": "gdouble"
+              },
+              {
+                "name": "yellow-blue",
+                "type": "gdouble"
+              }
+            ],
+            "gimp-drawable-curves-explicit": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "channel",
+                "type": "GimpHistogramChannel"
+              },
+              {
+                "name": "values",
+                "type": "GimpDoubleArray"
+              }
+            ],
+            "gimp-drawable-hue-saturation": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "hue-range",
+                "type": "GimpHueRange"
+              },
+              {
+                "name": "hue-offset",
+                "type": "gdouble"
+              },
+              {
+                "name": "lightness",
+                "type": "gdouble"
+              },
+              {
+                "name": "saturation",
+                "type": "gdouble"
+              },
+              {
+                "name": "overlap",
+                "type": "gdouble"
+              }
+            ],
+            "gimp-xcf-save": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "run-mode",
+                "type": "GimpRunMode"
+              },
+              {
+                "name": "image",
+                "type": "GimpImage"
+              },
+              {
+                "name": "file",
+                "type": "GFile"
+              }
+            ]
+          },
+          "signatures": {
+            "color_balance": "color_balance(self, transfer_mode:Gimp.TransferMode, preserve_lum:bool, cyan_red:float, magenta_green:float, yellow_blue:float) -> bool",
+            "curves_explicit": "curves_explicit(self, channel:Gimp.HistogramChannel, values:list) -> bool",
+            "hue_saturation": "hue_saturation(self, hue_range:Gimp.HueRange, hue_offset:float, lightness:float, saturation:float, overlap:float) -> bool"
+          },
+          "version": "3.2.4"
+        },
+        "identity": "3ffb7a9373e34f708e3f560d60f93fe1",
+        "reopened": true,
+        "seconds": 10.084,
+        "size": [
+          1600,
+          1200
+        ]
+      }
+    },
+    {
+      "version": "S003",
+      "checkpoint_sha256": "898c7ac891f3011b493e41f0e97427f931426a8b51663c9870aa88f8bd55da8f",
+      "preview_sha256": "c803ee535e7aa064eb906e4f2073f83c38e5abb10a3a7d20b693a84a35b0dbc8",
+      "operation": "saturation",
+      "verification": {
+        "environment": {
+          "procedures": {
+            "file-png-export": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "run-mode",
+                "type": "GimpRunMode"
+              },
+              {
+                "name": "image",
+                "type": "GimpImage"
+              },
+              {
+                "name": "file",
+                "type": "GFile"
+              },
+              {
+                "name": "options",
+                "type": "GimpExportOptions"
+              },
+              {
+                "name": "interlaced",
+                "type": "gboolean"
+              },
+              {
+                "name": "compression",
+                "type": "gint"
+              },
+              {
+                "name": "bkgd",
+                "type": "gboolean"
+              },
+              {
+                "name": "offs",
+                "type": "gboolean"
+              },
+              {
+                "name": "phys",
+                "type": "gboolean"
+              },
+              {
+                "name": "time",
+                "type": "gboolean"
+              },
+              {
+                "name": "save-transparent",
+                "type": "gboolean"
+              },
+              {
+                "name": "optimize-palette",
+                "type": "gboolean"
+              },
+              {
+                "name": "format",
+                "type": "gchararray"
+              },
+              {
+                "name": "include-exif",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-iptc",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-xmp",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-color-profile",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-thumbnail",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-comment",
+                "type": "gboolean"
+              }
+            ],
+            "gimp-drawable-color-balance": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "transfer-mode",
+                "type": "GimpTransferMode"
+              },
+              {
+                "name": "preserve-lum",
+                "type": "gboolean"
+              },
+              {
+                "name": "cyan-red",
+                "type": "gdouble"
+              },
+              {
+                "name": "magenta-green",
+                "type": "gdouble"
+              },
+              {
+                "name": "yellow-blue",
+                "type": "gdouble"
+              }
+            ],
+            "gimp-drawable-curves-explicit": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "channel",
+                "type": "GimpHistogramChannel"
+              },
+              {
+                "name": "values",
+                "type": "GimpDoubleArray"
+              }
+            ],
+            "gimp-drawable-hue-saturation": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "hue-range",
+                "type": "GimpHueRange"
+              },
+              {
+                "name": "hue-offset",
+                "type": "gdouble"
+              },
+              {
+                "name": "lightness",
+                "type": "gdouble"
+              },
+              {
+                "name": "saturation",
+                "type": "gdouble"
+              },
+              {
+                "name": "overlap",
+                "type": "gdouble"
+              }
+            ],
+            "gimp-xcf-save": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "run-mode",
+                "type": "GimpRunMode"
+              },
+              {
+                "name": "image",
+                "type": "GimpImage"
+              },
+              {
+                "name": "file",
+                "type": "GFile"
+              }
+            ]
+          },
+          "signatures": {
+            "color_balance": "color_balance(self, transfer_mode:Gimp.TransferMode, preserve_lum:bool, cyan_red:float, magenta_green:float, yellow_blue:float) -> bool",
+            "curves_explicit": "curves_explicit(self, channel:Gimp.HistogramChannel, values:list) -> bool",
+            "hue_saturation": "hue_saturation(self, hue_range:Gimp.HueRange, hue_offset:float, lightness:float, saturation:float, overlap:float) -> bool"
+          },
+          "version": "3.2.4"
+        },
+        "identity": "3ffb7a9373e34f708e3f560d60f93fe1",
+        "reopened": true,
+        "seconds": 9.741,
+        "size": [
+          1600,
+          1200
+        ]
+      }
+    },
+    {
+      "version": "S001",
+      "checkpoint_sha256": "697c4a7588c9192832b784b7a8daa3068edafbf83f8eb9acd6529e85fe4db05e",
+      "preview_sha256": "2dfc00546924c11af1491485f4c70bc6d4d0a24fa80d3e814a9bfc26604ecda0",
+      "operation": "curves",
+      "verification": {
+        "environment": {
+          "procedures": {
+            "file-png-export": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "run-mode",
+                "type": "GimpRunMode"
+              },
+              {
+                "name": "image",
+                "type": "GimpImage"
+              },
+              {
+                "name": "file",
+                "type": "GFile"
+              },
+              {
+                "name": "options",
+                "type": "GimpExportOptions"
+              },
+              {
+                "name": "interlaced",
+                "type": "gboolean"
+              },
+              {
+                "name": "compression",
+                "type": "gint"
+              },
+              {
+                "name": "bkgd",
+                "type": "gboolean"
+              },
+              {
+                "name": "offs",
+                "type": "gboolean"
+              },
+              {
+                "name": "phys",
+                "type": "gboolean"
+              },
+              {
+                "name": "time",
+                "type": "gboolean"
+              },
+              {
+                "name": "save-transparent",
+                "type": "gboolean"
+              },
+              {
+                "name": "optimize-palette",
+                "type": "gboolean"
+              },
+              {
+                "name": "format",
+                "type": "gchararray"
+              },
+              {
+                "name": "include-exif",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-iptc",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-xmp",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-color-profile",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-thumbnail",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-comment",
+                "type": "gboolean"
+              }
+            ],
+            "gimp-drawable-color-balance": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "transfer-mode",
+                "type": "GimpTransferMode"
+              },
+              {
+                "name": "preserve-lum",
+                "type": "gboolean"
+              },
+              {
+                "name": "cyan-red",
+                "type": "gdouble"
+              },
+              {
+                "name": "magenta-green",
+                "type": "gdouble"
+              },
+              {
+                "name": "yellow-blue",
+                "type": "gdouble"
+              }
+            ],
+            "gimp-drawable-curves-explicit": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "channel",
+                "type": "GimpHistogramChannel"
+              },
+              {
+                "name": "values",
+                "type": "GimpDoubleArray"
+              }
+            ],
+            "gimp-drawable-hue-saturation": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "hue-range",
+                "type": "GimpHueRange"
+              },
+              {
+                "name": "hue-offset",
+                "type": "gdouble"
+              },
+              {
+                "name": "lightness",
+                "type": "gdouble"
+              },
+              {
+                "name": "saturation",
+                "type": "gdouble"
+              },
+              {
+                "name": "overlap",
+                "type": "gdouble"
+              }
+            ],
+            "gimp-xcf-save": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "run-mode",
+                "type": "GimpRunMode"
+              },
+              {
+                "name": "image",
+                "type": "GimpImage"
+              },
+              {
+                "name": "file",
+                "type": "GFile"
+              }
+            ]
+          },
+          "signatures": {
+            "color_balance": "color_balance(self, transfer_mode:Gimp.TransferMode, preserve_lum:bool, cyan_red:float, magenta_green:float, yellow_blue:float) -> bool",
+            "curves_explicit": "curves_explicit(self, channel:Gimp.HistogramChannel, values:list) -> bool",
+            "hue_saturation": "hue_saturation(self, hue_range:Gimp.HueRange, hue_offset:float, lightness:float, saturation:float, overlap:float) -> bool"
+          },
+          "version": "3.2.4"
+        },
+        "identity": "3ffb7a9373e34f708e3f560d60f93fe1",
+        "reopened": true,
+        "seconds": 9.703,
+        "size": [
+          1600,
+          1200
+        ]
+      }
+    },
+    {
+      "version": "S004",
+      "checkpoint_sha256": "c2ced5c2779936ac10585be76cadde521739d251b0a9ec2000e5780565c3d63f",
+      "preview_sha256": "9f9cb08bf1f759f69ce05d44f476f76c4fce93585ceeaacf13cbaebf675b33ab",
+      "operation": "curves",
+      "verification": {
+        "environment": {
+          "procedures": {
+            "file-png-export": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "run-mode",
+                "type": "GimpRunMode"
+              },
+              {
+                "name": "image",
+                "type": "GimpImage"
+              },
+              {
+                "name": "file",
+                "type": "GFile"
+              },
+              {
+                "name": "options",
+                "type": "GimpExportOptions"
+              },
+              {
+                "name": "interlaced",
+                "type": "gboolean"
+              },
+              {
+                "name": "compression",
+                "type": "gint"
+              },
+              {
+                "name": "bkgd",
+                "type": "gboolean"
+              },
+              {
+                "name": "offs",
+                "type": "gboolean"
+              },
+              {
+                "name": "phys",
+                "type": "gboolean"
+              },
+              {
+                "name": "time",
+                "type": "gboolean"
+              },
+              {
+                "name": "save-transparent",
+                "type": "gboolean"
+              },
+              {
+                "name": "optimize-palette",
+                "type": "gboolean"
+              },
+              {
+                "name": "format",
+                "type": "gchararray"
+              },
+              {
+                "name": "include-exif",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-iptc",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-xmp",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-color-profile",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-thumbnail",
+                "type": "gboolean"
+              },
+              {
+                "name": "include-comment",
+                "type": "gboolean"
+              }
+            ],
+            "gimp-drawable-color-balance": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "transfer-mode",
+                "type": "GimpTransferMode"
+              },
+              {
+                "name": "preserve-lum",
+                "type": "gboolean"
+              },
+              {
+                "name": "cyan-red",
+                "type": "gdouble"
+              },
+              {
+                "name": "magenta-green",
+                "type": "gdouble"
+              },
+              {
+                "name": "yellow-blue",
+                "type": "gdouble"
+              }
+            ],
+            "gimp-drawable-curves-explicit": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "channel",
+                "type": "GimpHistogramChannel"
+              },
+              {
+                "name": "values",
+                "type": "GimpDoubleArray"
+              }
+            ],
+            "gimp-drawable-hue-saturation": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "drawable",
+                "type": "GimpDrawable"
+              },
+              {
+                "name": "hue-range",
+                "type": "GimpHueRange"
+              },
+              {
+                "name": "hue-offset",
+                "type": "gdouble"
+              },
+              {
+                "name": "lightness",
+                "type": "gdouble"
+              },
+              {
+                "name": "saturation",
+                "type": "gdouble"
+              },
+              {
+                "name": "overlap",
+                "type": "gdouble"
+              }
+            ],
+            "gimp-xcf-save": [
+              {
+                "name": "procedure",
+                "type": "GimpProcedure"
+              },
+              {
+                "name": "run-mode",
+                "type": "GimpRunMode"
+              },
+              {
+                "name": "image",
+                "type": "GimpImage"
+              },
+              {
+                "name": "file",
+                "type": "GFile"
+              }
+            ]
+          },
+          "signatures": {
+            "color_balance": "color_balance(self, transfer_mode:Gimp.TransferMode, preserve_lum:bool, cyan_red:float, magenta_green:float, yellow_blue:float) -> bool",
+            "curves_explicit": "curves_explicit(self, channel:Gimp.HistogramChannel, values:list) -> bool",
+            "hue_saturation": "hue_saturation(self, hue_range:Gimp.HueRange, hue_offset:float, lightness:float, saturation:float, overlap:float) -> bool"
+          },
+          "version": "3.2.4"
+        },
+        "identity": "3ffb7a9373e34f708e3f560d60f93fe1",
+        "reopened": true,
+        "seconds": 9.879,
+        "size": [
+          1600,
+          1200
+        ]
+      }
+    }
+  ]
+}

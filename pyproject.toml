@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lemon-photo"
+version = "0.1.0"
+description = "Local reference-guided photo grading with GIMP and recoverable history"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1", "python-multipart>=0.0.20,<1", "Pillow>=11,<13", "numpy>=2,<3", "httpx>=0.28,<1"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "httpx>=0.28,<1", "ruff>=0.11,<1"]
+
+[project.scripts]
+lemon = "lemon.__main__:main"
+
+[tool.setuptools.package-data]
+lemon = ["static/*"]
+
+[tool.ruff]
+line-length = 110
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+include = ["lemon*"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
