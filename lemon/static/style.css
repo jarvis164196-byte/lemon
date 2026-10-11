@@ -915,3 +915,18 @@ dialog p {
   justify-content: flex-end;
   margin-top: 25px;
 }
+
+#import-feedback {
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--lime);
+  font-size: 13px;
+  line-height: 1.5;
+}
+#import-feedback.error {
+  background: #3d2b23;
+  border-color: #806448;
+  color: #ffe1bd;
+}

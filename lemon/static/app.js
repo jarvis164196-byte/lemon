@@ -17,10 +17,21 @@ let project = null,
 const requests = new Map();
 function activity(message) {
   $("#activity").textContent = message;
+  if (!$("#welcome").hidden) {
+    $("#import-feedback").textContent = message;
+    $("#import-feedback").hidden = !message;
+  }
 }
 function notice(message = "") {
   $("#notice").textContent = message;
   $("#notice").hidden = !message;
+  if (!$("#welcome").hidden && message) {
+    $("#import-feedback").textContent = message;
+    $("#import-feedback").hidden = false;
+    $("#import-feedback").classList.add("error");
+  } else if (!message) {
+    $("#import-feedback").classList.remove("error");
+  }
 }
 async function api(path, body, method = "POST") {
   const options =
@@ -54,8 +65,8 @@ async function task(message, action) {
   try {
     await action();
   } catch (error) {
+    activity("Action stopped. Review the error message.");
     notice(error.message);
-    activity("Action stopped. Review the message above.");
   } finally {
     busy = false;
     document.body.classList.remove("busy");
@@ -63,6 +74,8 @@ async function task(message, action) {
   }
 }
 function lockControls() {
+  $("#import-form").setAttribute("aria-busy", String(busy));
+  $("#import-button").textContent = busy ? "Working…" : "Open in Lemon ↗";
   document
     .querySelectorAll(
       "button:not([data-node]):not([data-view]), #import-form input, #strength, #planner, #instruction, #vision-consent",

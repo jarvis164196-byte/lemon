@@ -30,3 +30,7 @@ python scripts/integration.py --workspace work/integration --evidence validation
 ```
 
 The native command requires GIMP 3 and may take a few minutes because every operation starts an isolated editor. Test assets and logs remain in ignored `work/`; the JSON report contains synthetic-image hashes, discovered schemas, real editor versions, and per-operation verification timings. Do not replace these fixtures with private photos and publish their resulting data without reviewing it.
+
+## Import feedback follow-up
+
+Browser verification on October 11, 2026 confirmed that an unsupported grayscale fixture now produces an inline error directly below the import button, retaining both file selections and re-enabling the form. Replacing it with a supported synthetic RGB source successfully created a verified S000 through the running GIMP backend. Pending imports show “Working…” and checkpoint progress beside the button. All 25 existing tests and JavaScript syntax checks passed. This does not establish the cause of the reported failure with the user’s private photo pair.
