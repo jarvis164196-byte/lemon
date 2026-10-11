@@ -86,6 +86,7 @@ function lockControls() {
   if (!busy) $("#retouch-save").disabled = !retouchCandidate;
   if (project && !busy) {
     $("#vision-consent").disabled = !visionAvailable;
+    $("#agent-propose").disabled = !visionAvailable || !project?.vision_consent?.granted || project.session_status !== "ready";
     $("#propose").disabled = project.session_status !== "ready";
     const node = project.nodes[selected];
     $("#restore").disabled = !node?.healthy;
@@ -302,6 +303,28 @@ $("#strength").addEventListener(
   "input",
   (e) => ($("#strength-value").textContent = e.target.value + "%"),
 );
+$("#agent-propose").addEventListener("click", () => {
+  const instruction = $("#instruction").value.trim();
+  if (!instruction) { notice("Describe the edit you want first."); return; }
+  task("Asking OpenAI to propose an edit from the working version…", async () => {
+    const proposal = await api(`/projects/${project.id}/plans`, {
+      planner:"agent", instruction, strength:Number($("#strength").value)/100
+    });
+    const step = proposal.steps[0];
+    if (step.tool === "retouch") {
+      retouchNode = proposal.base_node_id; retouchRegion = step.arguments.region;
+      invalidateRetouch();
+      $("#retouch-before").src = asset("preview", retouchNode);
+      $("#retouch-kind").value = step.arguments.kind;
+      $("#retouch-amount").value = Math.round(step.arguments.amount*100);
+      const [x,y,w,h] = retouchRegion, a = $("#retouch-area"); a.hidden = false;
+      Object.assign(a.style,{left:x*100+"%",top:y*100+"%",width:w*100+"%",height:h*100+"%"});
+      $("#retouch-status").textContent = step.explanation + " Review the selected area, then generate a preview.";
+      $("#retouch-dialog").showModal();
+    } else { plan = proposal; renderPlan(); }
+    activity("AI proposal ready for review. No saved version has changed.");
+  });
+});
 $("#propose").addEventListener("click", () =>
   task(
     $("#planner").value === "openai"
@@ -528,6 +551,7 @@ document.addEventListener("click", (e) => {
     if (visionAvailable)
       $("#planner").append(new Option("OpenAI vision", "openai"));
     $("#vision-consent").disabled = !visionAvailable;
+    $("#agent-propose").disabled = !visionAvailable || !project?.vision_consent?.granted || project.session_status !== "ready";
     $("#vision-status").textContent = visionAvailable
       ? `OpenAI ${status.vision_model} configured. Permission required per project.`
       : "To enable AI direction, set OPENAI_API_KEY before starting Lemon. Local analysis is ready without a key.";

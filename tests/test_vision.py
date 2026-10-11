@@ -132,3 +132,52 @@ def test_provider_error_does_not_echo_secrets(monkeypatch, pair):
     with pytest.raises(ValueError, match="HTTP 401") as error:
         VisionPlanner(api_key="sensitive-test-key").propose(*pair, 0.5, "")
     assert "sensitive-test-key" not in str(error.value)
+
+
+def test_agent_proposes_bounded_muscle_preview(monkeypatch, pair):
+    value = dict(
+        recipe(),
+        action="muscle",
+        region=[0.2, 0.3, 0.1, 0.2],
+        amount=0.25,
+        explanation="Subtle volume; review background distortion.",
+    )
+    captured = {}
+    install_response(monkeypatch, value, captured)
+    steps = VisionPlanner(api_key="test").propose(*pair, 0.5, "Add upper arm volume", agent=True)
+    assert steps[0]["tool"] == "retouch"
+    assert steps[0]["arguments"]["kind"] == "muscle"
+    assert captured["payload"]["text"]["format"]["schema"]["additionalProperties"] is False
+    for changes in [dict(region=[0.9, 0.3, 0.2, 0.2]), dict(amount=0.9), dict(action="exec")]:
+        install_response(monkeypatch, dict(value, **changes), {})
+        with pytest.raises(ValueError):
+            VisionPlanner(api_key="test").propose(*pair, 0.5, "test", agent=True)
+    install_response(monkeypatch, dict(value, action="unsupported", explanation="Specify one arm."), {})
+    with pytest.raises(ValueError, match="Specify one arm"):
+        VisionPlanner(api_key="test").propose(*pair, 0.5, "test", agent=True)
+
+
+def test_agent_requires_consent_and_does_not_edit(controller, project, monkeypatch):
+    controller.vision = VisionPlanner(api_key="test")
+    captured = {}
+    install_response(
+        monkeypatch,
+        dict(recipe(), action="muscle", region=[0.2, 0.3, 0.1, 0.2], amount=0.2, explanation="Volume only."),
+        captured,
+    )
+    with pytest.raises(ValueError, match="permission"):
+        controller.plan(project["id"], 0.5, "agent", "Add volume")
+    assert not captured
+    original = controller.adapter.call
+
+    def call(job):
+        if job["action"] == "thumbnail":
+            Image.new("RGB", (64, 48)).save(job["output"])
+            return {}
+        return original(job)
+
+    controller.adapter.call = call
+    controller.consent(project["id"], True)
+    plan = controller.plan(project["id"], 0.5, "agent", "Add volume")
+    assert plan["steps"][0]["arguments"]["kind"] == "muscle"
+    assert len(controller.history(project["id"])["nodes"]) == 1

@@ -10,7 +10,12 @@ from .imaging import pixels
 def validate_step(step: dict) -> dict:
     tool, args = step.get("tool"), step.get("arguments", {})
     if tool == "retouch":
-        if set(args) != {"kind", "region", "amount"} or args["kind"] not in {"skin", "wrinkles", "reshape"}:
+        if set(args) != {"kind", "region", "amount"} or args["kind"] not in {
+            "skin",
+            "wrinkles",
+            "reshape",
+            "muscle",
+        }:
             raise ValueError("Invalid retouch tool.")
         region = args["region"]
         if (

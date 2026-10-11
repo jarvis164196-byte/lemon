@@ -31,7 +31,7 @@ s = c.create("Retouch acceptance fixture", source, source)
 pid = s["id"]
 nid = s["working_node_id"]
 base = np.asarray(Image.open(c.asset(pid, "preview", nid)).convert("RGB"))
-for kind in ["skin", "wrinkles", "reshape"]:
+for kind in ["skin", "wrinkles", "muscle", "reshape"]:
     p = c.retouch_preview(pid, nid, kind, [0.05, 0.1, 0.35, 0.6], 0.6)
     out = np.asarray(Image.open(c.asset(pid, "retouch", p["id"])).convert("RGB"))
     print(kind, "diff pixels", int(np.any(base != out, axis=2).sum()), flush=True)

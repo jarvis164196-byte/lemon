@@ -151,12 +151,19 @@ def run(job):
             elif args["kind"] == "wrinkles":
                 op, params = "gegl:gaussian-blur", {"std-dev-x": 2 + 8 * amount, "std-dev-y": 2 + 8 * amount}
             else:
-                op, params = "gegl:whirl-pinch", {"whirl": 0.0, "pinch": amount * 0.4, "radius": 1.0}
+                op, params = (
+                    "gegl:whirl-pinch",
+                    {
+                        "whirl": 0.0,
+                        "pinch": amount * (-0.4 if args["kind"] == "muscle" else 0.4),
+                        "radius": 1.0,
+                    },
+                )
             effect = Gimp.DrawableFilter.new(layer, op, step["label"])
             config = effect.get_config()
             for key, value in params.items():
                 config.set_property(key, value)
-            effect.set_opacity(1.0 if args["kind"] == "reshape" else amount)
+            effect.set_opacity(1.0 if args["kind"] in {"reshape", "muscle"} else amount)
             effect.update()
             layer.merge_filter(effect)
             Gimp.Selection.none(image)

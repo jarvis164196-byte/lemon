@@ -345,7 +345,7 @@ class Controller:
     def plan(self, project_id, strength, planner="local", instruction=""):
         if not math.isfinite(strength) or not 0.05 <= strength <= 1:
             raise ValueError("Strength must be between 0.05 and 1.")
-        if planner not in {"local", "openai"}:
+        if planner not in {"local", "openai", "agent"}:
             raise ValueError("Unknown planner.")
         if len(instruction) > 500:
             raise ValueError("Keep instructions under 500 characters.")
@@ -359,7 +359,7 @@ class Controller:
             self.verify_files(path, node)
             source_preview = path / "nodes" / node["id"] / "preview.png"
             reference = path / "inputs" / state["inputs"]["reference"]["file"]
-            if planner == "openai":
+            if planner in {"openai", "agent"}:
                 consent = state.get("vision_consent", {})
                 if (
                     not consent.get("granted")
@@ -398,7 +398,13 @@ class Controller:
                 state.setdefault("vision_submissions", []).append(submission)
                 self.write(path, state)
                 try:
-                    steps = self.vision.propose(source_preview, reference_preview, strength, instruction)
+                    steps = self.vision.propose(
+                        source_preview,
+                        reference_preview,
+                        strength,
+                        instruction,
+                        **({"agent": True} if planner == "agent" else {}),
+                    )
                 except Exception:
                     submission["status"] = "unconfirmed_or_failed"
                     self.write(path, state)
@@ -415,7 +421,7 @@ class Controller:
                 "reference_hash": state["inputs"]["reference"]["sha256"],
                 "strength": strength,
                 "planner": planner_name,
-                "instruction": instruction if planner == "openai" else "",
+                "instruction": instruction if planner in {"openai", "agent"} else "",
                 "steps": steps,
             }
             plan["hash"] = fingerprint(plan)
@@ -533,6 +539,7 @@ class Controller:
             "skin": "Smooth selected skin",
             "wrinkles": "Soften selected wrinkles",
             "reshape": "Reshape selected area",
+            "muscle": "Add local muscle volume",
         }
         step = validate_step(
             {

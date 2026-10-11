@@ -145,19 +145,19 @@
         <div class="range-labels">
           <span>Subtle</span><span>Expressive</span>
         </div>
-        <details class="vision-settings">
-          <summary>Optional AI direction</summary>
+        <section class="vision-settings">
+          <h3>Ask Lemon AI</h3>
           <p id="vision-status" class="small muted">
             Checking model configuration…
           </p>
           <label for="planner">Planner</label
           ><select id="planner">
             <option value="local">Local analysis · no upload</option></select
-          ><label for="instruction">What feeling are you after?</label
+          ><label for="instruction">Describe an edit</label
           ><textarea
             id="instruction"
             maxlength="500"
-            placeholder="Warm evening light, softer contrast…"
+            placeholder="Warm evening light, smooth the cheek, or subtly enlarge the left upper arm…"
           ></textarea
           ><label class="consent-label"
             ><input type="checkbox" id="vision-consent" /> Allow OpenAI to
@@ -168,7 +168,9 @@
             Original files and metadata stay local. Revoke permission here at
             any time. GIMP still performs every edit.
           </p>
-        </details>
+          <button id="agent-propose" class="primary full">Propose AI edit</button>
+          <p class="small muted">AI proposes color changes or one selected-area retouch. Review before saving. Muscle volume reshapes existing pixels; it does not generate new anatomy.</p>
+        </section>
         <button id="propose" class="primary full">
           Analyze reference <span>✧</span>
         </button>
@@ -213,8 +215,8 @@
     <dialog id="export-dialog" aria-labelledby="export-title">
       <form method="dialog">
         <h2 id="export-title">Export selected version</h2>
-        <label>Format <select id="export-format"><option value="jpeg">JPEG · smaller files</option><option value="png">PNG · lossless</option></select></label>
-        <label>Size <select id="export-size"><option value="">Original size</option><option value="4096">4096 px long edge</option><option value="2560">2560 px long edge</option><option value="2048">2048 px long edge</option><option value="1080">1080 px long edge</option><option value="custom">Custom long edge</option></select></label>
+        <label>Format <select id="export-format"><option value="jpeg">JPEG · smaller files</option><option value="png">PNG · lossless</option><option value="muscle">Muscle volume · experimental bulge</option></select></label>
+        <label>Size <select id="export-size"><option value="">Original size</option><option value="4096">4096 px long edge</option><option value="2560">2560 px long edge</option><option value="2048">2048 px long edge</option><option value="1080">1080 px long edge</option><option value="custom">Custom long edge</option><option value="muscle">Muscle volume · experimental bulge</option></select></label>
         <label id="export-custom-label" hidden>Long edge (pixels)<input id="export-custom" type="number" min="64" max="20000" value="2000" /></label>
         <label id="export-quality-label">JPEG quality (1–100)<input id="export-quality" type="number" min="1" max="100" value="90" required /></label>
         <label id="export-compression-label" hidden>PNG compression (0–9)<input id="export-compression" type="number" min="0" max="9" value="6" required /></label>
@@ -226,10 +228,10 @@
       <h2 id="retouch-title">Retouch selected area</h2>
       <p>Drag an oval around a small area on the left. Preview before saving a new version.</p>
       <div class="retouch-controls">
-        <label>Tool<select id="retouch-kind"><option value="skin">Skin smoothing</option><option value="wrinkles">Wrinkle softening</option><option value="reshape">Local pinch · experimental reshaping</option></select></label>
+        <label>Tool<select id="retouch-kind"><option value="skin">Skin smoothing</option><option value="wrinkles">Wrinkle softening</option><option value="reshape">Local pinch · experimental reshaping</option><option value="muscle">Muscle volume · experimental bulge</option></select></label>
         <label>Strength<input id="retouch-amount" type="range" min="5" max="80" value="30" /></label>
       </div>
-      <p class="small muted">Smoothing can reduce skin texture; wrinkle softening uses gentle blur. Pinching can narrow a selected area but can also distort the surrounding background. These tools do not detect skin or legs automatically.</p>
+      <p class="small muted">Smoothing can reduce skin texture; wrinkle softening uses gentle blur. Pinching can narrow a selected area but can also distort the surrounding background. Muscle volume gently enlarges existing shapes; it cannot generate muscle definition. Manual tools do not detect body parts automatically.</p>
       <div class="retouch-images"><div><strong>Before · draw your area</strong><div id="retouch-surface"><img id="retouch-before" alt="Retouch source, drag to select area" draggable="false" /><div id="retouch-area" hidden></div></div></div><div><strong>Preview · not saved</strong><img id="retouch-after" alt="Retouch preview" hidden /></div></div>
       <p id="retouch-status" role="status" aria-live="polite">Select an area to start.</p>
       <div class="dialog-actions"><button id="retouch-close">Cancel</button><button id="retouch-preview">Generate preview</button><button id="retouch-save" class="primary" disabled>Save version</button></div>
