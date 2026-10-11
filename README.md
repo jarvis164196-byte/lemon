@@ -35,7 +35,7 @@ Projects default to `~/.local/share/lemon`. They contain private source/referenc
 
 ## Two photos → a new look
 
-1. Import your source and reference. Supported: single-image **8-bit sRGB RGB/RGBA PNG or RGB JPEG**, up to 40 MB and 32 MP each. Untagged files are treated as sRGB. Apply EXIF orientation first. Wide-gamut profiles, HDR, RAW, grayscale, and indexed inputs are rejected rather than silently converted.
+1. Import your source and reference. Supported: single-image **8-bit sRGB RGB/RGBA PNG or RGB JPEG**, up to 40 MB and 32 MP each. Untagged files are treated as sRGB. Camera EXIF orientation is applied by GIMP to the managed copy; original files remain unchanged. Wide-gamut profiles, HDR, RAW, grayscale, and indexed inputs are rejected rather than silently converted.
 2. GIMP creates and reopens the original XCF checkpoint. No editing starts without it.
 3. Choose a match strength and select **Analyze reference**. Local statistics propose three bounded adjustments: a monotonic brightness curve, midtone color balance, and saturation.
 4. Inspect exact parameters. Approve one step, or explicitly approve the remaining recipe. Each step saves and verifies its own version; any failure stops the group.
@@ -94,7 +94,7 @@ See [validation/README.md](validation/README.md) for the evidence boundary. Unit
 - Evaluate five authorized real-photo pairs with recorded human feedback.
 - Validate the optional vision planner with a configured provider and authorized real photos; improve its proposals from human feedback.
 - Add a restricted agent/MCP interface, cancellation between steps, and more informative long-running progress.
-- Expand color-profile/orientation support and verify Linux packaging.
+- Expand color-profile support and verify Linux packaging.
 - Improve history layout for large trees and measure preview latency on large projects.
 
 Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Licensed under [MIT](LICENSE). GIMP is a separate dependency with its own license; it is not bundled in this repository.

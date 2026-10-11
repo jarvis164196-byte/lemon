@@ -37,10 +37,9 @@ def _validate_image(path: Path, max_bytes) -> dict:
                 header = header_file.read(25)
             if im.format == "PNG" and header[24] != 8:
                 raise ValueError("16-bit PNG is not supported yet. Export an 8-bit sRGB copy.")
-            if im.getexif().get(274, 1) != 1:
-                raise ValueError(
-                    "Apply the photo's orientation before importing (export an upright sRGB copy)."
-                )
+            orientation = im.getexif().get(274, 1)
+            if orientation not in range(1, 9):
+                raise ValueError("The photo has an invalid EXIF orientation tag.")
             profile = im.info.get("icc_profile")
             if profile:
                 description = ImageCms.getProfileDescription(
@@ -54,7 +53,14 @@ def _validate_image(path: Path, max_bytes) -> dict:
                 description = "Untagged; interpreted as sRGB"
             if any(k in im.info for k in ("cicp", "hdr")):
                 raise ValueError("HDR-tagged inputs are not supported.")
-            metadata = {"width": im.width, "height": im.height, "format": im.format, "profile": description}
+            width, height = (im.height, im.width) if orientation >= 5 else im.size
+            metadata = {
+                "width": width,
+                "height": height,
+                "format": im.format,
+                "profile": description,
+                "orientation": orientation,
+            }
         with Image.open(path) as verification:
             verification.verify()
     return metadata

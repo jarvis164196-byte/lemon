@@ -34,3 +34,9 @@ The native command requires GIMP 3 and may take a few minutes because every oper
 ## Import feedback follow-up
 
 Browser verification on October 11, 2026 confirmed that an unsupported grayscale fixture now produces an inline error directly below the import button, retaining both file selections and re-enabling the form. Replacing it with a supported synthetic RGB source successfully created a verified S000 through the running GIMP backend. Pending imports show “Working…” and checkpoint progress beside the button. All 25 existing tests and JavaScript syntax checks passed. This does not establish the cause of the reported failure with the user’s private photo pair.
+
+## Camera orientation and real-photo test
+
+On October 11, 2026, a user-authorized local photo pair completed upright import, three committed GIMP edits at 55% strength, and a 3648×5472 PNG export. Source and reference SHA-256 values were unchanged; the final preview differed from the original preview. Private photographs, hashes, filenames, and project records are excluded from this repository. This verifies mechanics on a real pair, not human acceptance of the aesthetic match.
+
+All eight EXIF transforms passed native GIMP 3.2.4 checks using asymmetric synthetic corner-color PNG fixtures compared against an in-memory orientation oracle. Reproduce with `python scripts/check_orientation.py --workspace work/orientation-test`. Unit tests now total 33 passing tests.

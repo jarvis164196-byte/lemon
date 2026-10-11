@@ -30,6 +30,15 @@ def discover():
     return {
         "version": Gimp.version(),
         "procedures": schemas,
+        "orientation_api": {
+            "rotate": Gimp.Image.rotate.__doc__,
+            "flip": Gimp.Image.flip.__doc__,
+            "enums": {
+                name: str(getattr(Gimp, name).__enum_values__)
+                for name in dir(Gimp)
+                if name in {"RotationType", "OrientationType"}
+            },
+        },
         "signatures": {
             name: getattr(Gimp.Drawable, name).__doc__
             for name in ["curves_explicit", "color_balance", "hue_saturation"]
@@ -84,6 +93,20 @@ def run(job):
     if job["action"] == "discover":
         return environment
     image = load(job["input"])
+    if job["action"] in {"root", "thumbnail"}:
+        # GIMP noninteractive loads retain the stored pixel orientation. Apply EXIF once.
+        orientation = job.get("orientation", 1)
+        if orientation not in range(1, 9):
+            raise RuntimeError("Invalid input orientation.")
+        if orientation in {2, 5, 7}:
+            if not image.flip(Gimp.OrientationType(0)):
+                raise RuntimeError("Native orientation flip failed.")
+        elif orientation == 4:
+            if not image.flip(Gimp.OrientationType(1)):
+                raise RuntimeError("Native orientation flip failed.")
+        rotation = {3: 1, 5: 2, 6: 0, 7: 0, 8: 2}.get(orientation)
+        if rotation is not None and not image.rotate(Gimp.RotationType(rotation)):
+            raise RuntimeError("Native orientation rotation failed.")
     if job["action"] == "thumbnail":
         width, height = image.get_width(), image.get_height()
         ratio = min(1, 1400 / max(width, height))

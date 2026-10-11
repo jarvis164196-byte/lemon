@@ -149,6 +149,7 @@ class Controller:
             "input": str(input_path),
             "identity": state["identity"],
             "size": state["size"],
+            "orientation": state["inputs"]["source"].get("orientation", 1) if action == "root" else 1,
             **{k: str(v) if isinstance(v, Path) else v for k, v in kwargs.items()},
         }
 
@@ -346,7 +347,12 @@ class Controller:
                 analysis.mkdir()
                 reference_preview = analysis / "reference.png"
                 self.adapter.call(
-                    {"action": "thumbnail", "input": str(reference), "output": str(reference_preview)}
+                    {
+                        "action": "thumbnail",
+                        "input": str(reference),
+                        "output": str(reference_preview),
+                        "orientation": state["inputs"]["reference"].get("orientation", 1),
+                    }
                 )
                 validate_image(reference_preview)
                 submission = {

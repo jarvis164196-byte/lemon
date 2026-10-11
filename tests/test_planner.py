@@ -48,3 +48,16 @@ def test_accepts_explicit_srgb_profile(tmp_path):
     profile = ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes()
     Image.new("RGB", (64, 64)).save(path, icc_profile=profile)
     assert "sRGB" in validate_image(path)["profile"]
+
+
+@pytest.mark.parametrize("orientation", range(1, 9))
+def test_exif_orientation_reports_upright_size_without_changing_input(tmp_path, orientation):
+    path = tmp_path / "camera.jpg"
+    exif = Image.Exif()
+    exif[274] = orientation
+    Image.new("RGB", (120, 80)).save(path, exif=exif)
+    before = path.read_bytes()
+    metadata = validate_image(path)
+    assert (metadata["width"], metadata["height"]) == ((80, 120) if orientation >= 5 else (120, 80))
+    assert metadata["orientation"] == orientation
+    assert path.read_bytes() == before

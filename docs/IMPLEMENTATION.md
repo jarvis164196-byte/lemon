@@ -34,7 +34,7 @@ The planner samples pixels in memory, estimates value quantiles, and blends a mo
 
 The tested environment is macOS arm64, Python 3.14, GIMP 3.2.4. POSIX locks and process groups preclude Windows support in this release. Linux paths are supported but real integration evidence is pending. Each process's private runtime directory and logs are retained; this consumes disk and is documented, not silently garbage-collected. HTTP services bind to exact IPv4 loopback with authentication, same-origin checks, no CORS, and a restrictive content security policy.
 
-Inputs are limited to upright 8-bit sRGB images. Untagged inputs are explicitly interpreted as sRGB; an embedded profile must identify sRGB. This is a conservative compatibility check, not a full color-management certification. Future profile support must verify conversion behavior through GIMP.
+Inputs are limited to 8-bit sRGB images. Valid EXIF orientation tags (1–8) are applied once through native GIMP rotation/flip operations on import, with upright dimensions recorded for checkpoint verification. Untagged inputs are explicitly interpreted as sRGB; an embedded profile must identify sRGB. This is a conservative compatibility check, not a full color-management certification. Future profile support must verify conversion behavior through GIMP.
 
 ## Optional vision boundary
 
